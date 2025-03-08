@@ -21,9 +21,13 @@ resource "aws_subnet" "public" {
   }
 }
 
-resource "aws_nat_gateway" "private" {
-  connectivity_type = "private"
+resource "aws_eip" "nat_gateway" {
+}
+
+resource "aws_nat_gateway" "public" {
+  connectivity_type = "public"
   subnet_id         = aws_subnet.public.id
+  allocation_id     = aws_eip.nat_gateway.id
 }
 
 resource "aws_internet_gateway" "igw" {
@@ -43,8 +47,12 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.packer.id
   route {
    cidr_block = aws_vpc.packer.cidr_block
-   gateway_id = aws_nat_gateway.private.id
- }
+   gateway_id = "local"
+  }
+  route {
+   cidr_block = "0.0.0.0/0"
+   gateway_id = aws_nat_gateway.public.id
+  }
 }
 
 resource "aws_route_table" "public" {
