@@ -8,6 +8,10 @@ packer {
       version = "~> 1"
       source = "github.com/hashicorp/ansible"
     }
+    password = {
+      version = ">= 0.1.0"
+      source  = "github.com/alexp-computematrix/password"
+    }
   }
 }
 
@@ -23,6 +27,8 @@ data "amazon-ami" "amazon-linux-latest" {
   owners      = ["amazon"]
   most_recent = true
 }
+
+data "password" "root" {}
 
 source "amazon-ebs" "cis" {
   ami_name      = "packer-cis-linux-aws-{{timestamp}}"
@@ -61,22 +67,22 @@ build {
   sources = [
     "source.amazon-ebs.cis"
   ]
-  provisioner "ansible" {
-    use_proxy               =  false
-    user                    =  "ssm-user"
-    extra_arguments         =  [ "-vvvv", "-e '{ \"amzn2023cis_config_aide\":false, \"amzn2023cis_level_2\":false }'", "--skip-tags nftables,firewalld,rsyslog,logrotate" ]
-    playbook_file           =  "~/.ansible/roles/AMAZON2023-CIS/site.yml"
-    ansible_env_vars        =  ["PACKER_BUILD_NAME={{ build_name }}"]
-    inventory_file_template =  "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user=ssm-user ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
-  }
-
   provisioner "shell" {
     inline = [
       "echo Connected via SSM at '${build.User}@${build.Host}:${build.Port}'",
+      # We must set a root password for CIS to run
+      format("echo 'root:%s' | sudo /usr/sbin/chpasswd -e", data.password.root.crypt),
       "sudo yum -y install amazon-cloudwatch-agent",
       # We accept the default dd agent version here
       "sudo DD_API_KEY=PREINSTALL DD_INSTALL_ONLY=true DD_SITE=datadoghq.com bash -c \"$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)\"",
       "echo End of Shell Config via SSM"
     ]
+  }
+  provisioner "ansible" {
+    use_proxy               =  false
+    extra_arguments         =  [ "-e --skip-tags level2-server,nftables,firewalld,rsyslog,logrotate" ]
+    playbook_file           =  "AMAZON2023-CIS/site.yml"
+    ansible_env_vars        =  ["PACKER_BUILD_NAME={{ build_name }}"]
+    inventory_file_template =  "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user=ec2-user ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
   }
 }
