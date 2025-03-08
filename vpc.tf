@@ -1,5 +1,6 @@
 resource "aws_vpc" "packer" {
   cidr_block = "172.30.0.0/16"
+  enable_dns_hostnames = true
 }
 
 resource "aws_subnet" "private" {
