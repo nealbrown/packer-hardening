@@ -4,6 +4,10 @@ packer {
       version = "~> 1"
       source  = "github.com/hashicorp/amazon"
     }
+    ansible = {
+      version = "~> 1"
+      source = "github.com/hashicorp/ansible"
+    }
   }
 }
 
@@ -53,17 +57,26 @@ source "amazon-ebs" "cis" {
 }
 
 build {
-  name = "Run Initial Config"
+  name = "Run Ansible and Shell Config"
   sources = [
     "source.amazon-ebs.cis"
   ]
+  provisioner "ansible" {
+    use_proxy               =  false
+    user                    =  "ssm-user"
+    extra_arguments         =  [ "-vvvv", "-e '{ \"amzn2023cis_config_aide\":false, \"amzn2023cis_level_2\":false }'", "--skip-tags nftables,firewalld,rsyslog,logrotate" ]
+    playbook_file           =  "~/.ansible/roles/AMAZON2023-CIS/site.yml"
+    ansible_env_vars        =  ["PACKER_BUILD_NAME={{ build_name }}"]
+    inventory_file_template =  "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user=ssm-user ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
+  }
+
   provisioner "shell" {
     inline = [
       "echo Connected via SSM at '${build.User}@${build.Host}:${build.Port}'",
       "sudo yum -y install amazon-cloudwatch-agent",
       # We accept the default dd agent version here
       "sudo DD_API_KEY=PREINSTALL DD_INSTALL_ONLY=true DD_SITE=datadoghq.com bash -c \"$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)\"",
-      "echo End of Initial Config via SSM"
+      "echo End of Shell Config via SSM"
     ]
   }
 }
