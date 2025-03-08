@@ -34,12 +34,14 @@ source "amazon-ebs" "cis" {
 
   vpc_filter {
     filters = {
-      "isDefault" : "true"
+      "isDefault" : "false"
     }
   }
   subnet_filter {
     filters = {
+          "tag:Name": "packer-subnet"
     }
+    random = false
   }
   # enforces imdsv2 support on the running instance being provisioned by Packer
   metadata_options {

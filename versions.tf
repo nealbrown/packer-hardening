@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.87"
+      version = "= 5.87"
     }
     # datadog = {
     #   source  = "DataDog/datadog"
@@ -13,5 +13,5 @@ terraform {
       source  = "hashicorp/random"
     }
   }
-  required_version = "1.10.3"
+  required_version = "1.11.1"
 }

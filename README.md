@@ -6,6 +6,7 @@ Don't pay per-instance for CIS hardening.  Initial target platform is Amazon Lin
 All credit for the ansible role goes to Ansible Lockdown https://github.com/ansible-lockdown/AMAZON2023-CIS
 
 Links
+* https://developer.hashicorp.com/packer/integrations/hashicorp/amazon
 * https://joshuajebaraj.com/posts/gcp-4/
 * https://github.com/konstruktoid/hardened-images
 * https://www.cisecurity.org/cis-hardened-images
