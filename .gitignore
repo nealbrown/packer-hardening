@@ -14,3 +14,10 @@ crash.log
 
 # For built boxes
 *.box
+
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfplan
+terraform-provider-*
