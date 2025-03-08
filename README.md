@@ -35,7 +35,11 @@ Then as ec2-user
 
 `echo 'localhost' >> hosts` 
 
-`ansible-playbook -i hosts amzn2023cis_config_aide:false,amzn2023cis_level_2:false site.yml`
+We must skip Aide since Amazon 2023 dropped it
+We must skip firewalld and nftables since they are not available
+and in this example we only apply CIS Level 1
+
+`ansible-playbook -i hosts -e '{ "amzn2023cis_config_aide":false, "amzn2023cis_level_2":false }' --skip-tags nftables,firewalld site.yml`
 
 # Provision Dedicated Packer VPC with roles and SSM endpoints
 
