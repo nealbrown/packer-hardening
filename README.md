@@ -3,6 +3,8 @@ CIS Control Packer Templates
 
 Don't pay per-instance for CIS hardening.  Initial target platform is Amazon Linux 2023.
 
+All credit for the ansible role goes to Ansible Lockdown https://github.com/ansible-lockdown/AMAZON2023-CIS
+
 Links
 * https://joshuajebaraj.com/posts/gcp-4/
 * https://github.com/konstruktoid/hardened-images
