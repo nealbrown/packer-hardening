@@ -61,8 +61,7 @@ build {
     inline = [
       "echo Connected via SSM at '${build.User}@${build.Host}:${build.Port}'",
       "sudo yum -y install amazon-cloudwatch-agent",
-      # We accept the default dd agent version here
-      # "sudo DD_API_KEY=PREINSTALL DD_INSTALL_ONLY=true DD_SITE=datadoghq.com bash -c \"$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)\""
+      "echo End of Initial Config via SSM"
     ]
   }
 }
