@@ -75,12 +75,21 @@ build {
       "sudo yum -y install amazon-cloudwatch-agent",
       # We accept the default dd agent version here
       "sudo DD_API_KEY=PREINSTALL DD_INSTALL_ONLY=true DD_SITE=datadoghq.com bash -c \"$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)\"",
+      # Remove sshd since we only allow SSM per CIS 2.4
+      "sudo yum remove -y openssh-server"
       "echo End of Shell Config via SSM"
     ]
   }
   provisioner "ansible" {
     use_proxy               =  false
-    extra_arguments         =  [ "-e --skip-tags level2-server,nftables,firewalld,rsyslog,logrotate" ]
+    # We skip Level 2 and some deprecated packages
+    extra_arguments         =  [ 
+      "--skip-tags", "level2-server",
+      "--skip-tags", "nftables",
+      "--skip-tags", "firewalld",
+      "--skip-tags", "rsyslog",
+      "--skip-tags", "logrotate" 
+      ]
     playbook_file           =  "AMAZON2023-CIS/site.yml"
     ansible_env_vars        =  ["PACKER_BUILD_NAME={{ build_name }}"]
     inventory_file_template =  "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user=ec2-user ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"

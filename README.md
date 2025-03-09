@@ -38,7 +38,7 @@ Then as ec2-user
 We must skip aide, firewalld, nftables, rsyslog, and logrotate since they are not available / deprecated
 and in this example we only apply CIS Level 1
 
-`ansible-playbook -i hosts -e '{ "amzn2023cis_config_aide":false, "amzn2023cis_level_2":false }' --skip-tags nftables,firewalld,rsyslog,logrotate site.yml`
+`ansible-playbook -i hosts --skip-tags level2-server,nftables,firewalld,rsyslog,logrotate site.yml`
 
 # Provision Dedicated Packer VPC with roles and SSM endpoints
 
@@ -60,10 +60,11 @@ Update the account number in the Packer role in `packer.tf` line 30.
 
 # Run Packer
 
-Remove cloudwatch and/or datadog agent installs if not needed.
+Remove cloudwatch and/or datadog agent installs if not needed.  Set your playbook path on line 93- git command to clone the upstream project is above.
 
 `packer build ansible.pkr.hcl`
 
+Unfortunately it takes 20 minutes to run.  If Amazon deprecates more packages, it may be necessary to add further skips to the extra arguments starting on line 86.
 
 # Links
 
