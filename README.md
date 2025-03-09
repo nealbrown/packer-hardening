@@ -70,7 +70,7 @@ If you need to remove sshd use `user-data` when you launch the instance- packer 
 
 ```
 # Remove sshd since we only allow SSM per CIS 2.4
-sudo yum remove -y openssh-server
+yum remove -y openssh-server
 ```
 
 # Audit Mode Findings
