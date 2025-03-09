@@ -75,8 +75,6 @@ build {
       "sudo yum -y install amazon-cloudwatch-agent",
       # We accept the default dd agent version here
       "sudo DD_API_KEY=PREINSTALL DD_INSTALL_ONLY=true DD_SITE=datadoghq.com bash -c \"$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)\"",
-      # Remove sshd since we only allow SSM per CIS 2.4
-      "sudo yum remove -y openssh-server",
       "echo End of Shell Config via SSM"
     ]
   }

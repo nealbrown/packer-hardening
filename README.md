@@ -66,6 +66,39 @@ Remove cloudwatch and/or datadog agent installs if not needed.  Set your playboo
 
 Unfortunately it takes 20 minutes to run.  If Amazon deprecates more packages, it may be necessary to add further skips to the extra arguments starting on line 86.
 
+If you need to remove sshd use `user-data` when you launch the instance- packer cannot do it natively since it breaks the ssh-over-ssm connection.
+
+```
+# Remove sshd since we only allow SSM per CIS 2.4
+sudo yum remove -y openssh-server
+```
+
+# Audit Mode Findings
+
+It is expected to get a few audit mode findings at the end of the run, on a clean Amazon Linux 2023 AMI.  Evaluate these for your environment.  These include:
+
+* [1.1.2.1] /tmp is not a separate partition
+* [1.1.8.1] /dev/shm is not a separate partition
+* [1.2.3] verify that you expect the Amazon Linux 2023 and Datadog yum repos to be in place
+* [1.6.1.6] Ensure no unconfined (non-chroot) services exist
+* [2.4] verify all running services are "necessary"
+* [6.1.12] Ensure SUID and SGID files are reviewed
+
+
+# Example of Yum Repo Audit Finding
+
+```
+"msg": [
+    Run Ansible and Shell Config.amazon-ebs.cis:         "Warning!! Below are the configured repos. Please review and make sure all align with site policy",
+    Run Ansible and Shell Config.amazon-ebs.cis:         [
+    Run Ansible and Shell Config.amazon-ebs.cis:             "repo id                   repo name",
+    Run Ansible and Shell Config.amazon-ebs.cis:             "amazonlinux               Amazon Linux 2023 repository",
+    Run Ansible and Shell Config.amazon-ebs.cis:             "datadog                   Datadog, Inc.",
+    Run Ansible and Shell Config.amazon-ebs.cis:             "kernel-livepatch          Amazon Linux 2023 Kernel Livepatch repository"
+    Run Ansible and Shell Config.amazon-ebs.cis:         ]
+    Run Ansible and Shell Config.amazon-ebs.cis:     ]
+```
+
 # Links
 
 * https://developer.hashicorp.com/packer/integrations/hashicorp/amazon
